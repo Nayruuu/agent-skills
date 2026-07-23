@@ -71,10 +71,10 @@ class MeasurementTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
-    def make_audit(self, cache_root: Path) -> dict:
+    def make_audit(self, cache_root: Path, candidate_depth: int = 1) -> dict:
         args = argparse.Namespace(
             roots=[str(cache_root)],
-            candidate_depth=1,
+            candidate_depth=candidate_depth,
             min_size=0,
             top=0,
         )
@@ -88,7 +88,7 @@ class WorkflowTests(unittest.TestCase):
             candidate_path.mkdir(parents=True)
             (candidate_path / "payload.bin").write_bytes(b"x" * 4096)
 
-            report = self.make_audit(cache_root)
+            report = self.make_audit(candidate_path, candidate_depth=0)
             self.assertEqual(report["kind"], reclaim_storage.AUDIT_KIND)
             self.assertEqual(report["mode"], "read_only")
             self.assertFalse(report["safety"]["deletion_performed"])
