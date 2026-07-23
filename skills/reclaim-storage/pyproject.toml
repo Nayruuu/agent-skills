@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reclaim-storage"
+version = "0.1.0"
+description = "Read-only cross-platform storage audit and cleanup planning CLI"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+reclaim-storage = "reclaim_storage:main"
+
+[tool.setuptools]
+py-modules = ["reclaim_storage"]
+package-dir = {"" = "scripts"}

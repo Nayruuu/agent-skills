@@ -1,0 +1,515 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reclaim Storage Documents",
+  "description": "Schema for audit, non-executable plan, and verification documents.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/audit"
+    },
+    {
+      "$ref": "#/$defs/plan"
+    },
+    {
+      "$ref": "#/$defs/verification"
+    }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "required": [
+        "device",
+        "inode",
+        "kind",
+        "size_bytes",
+        "modified_ns"
+      ],
+      "properties": {
+        "device": {
+          "type": "integer"
+        },
+        "inode": {
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "directory",
+            "file",
+            "symlink",
+            "special"
+          ]
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "modified_ns": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "measurements": {
+      "type": "object",
+      "required": [
+        "logical_bytes",
+        "allocated_bytes",
+        "file_count",
+        "directory_count",
+        "symlink_count_skipped",
+        "mount_count_skipped",
+        "special_file_count_skipped",
+        "hardlink_count_deduplicated",
+        "permission_error_count",
+        "other_error_count",
+        "complete",
+        "errors"
+      ],
+      "properties": {
+        "logical_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allocated_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "file_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "directory_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symlink_count_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mount_count_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "special_file_count_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hardlink_count_deduplicated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "permission_error_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "other_error_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "filesystem": {
+      "type": "object",
+      "required": [
+        "filesystem_id",
+        "probe_path",
+        "total_bytes",
+        "used_bytes",
+        "free_bytes"
+      ],
+      "properties": {
+        "filesystem_id": {
+          "type": "string"
+        },
+        "probe_path": {
+          "type": "string"
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "used_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "free_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "candidate_id",
+        "path",
+        "source_root",
+        "identity",
+        "category",
+        "risk",
+        "confidence",
+        "rebuildability",
+        "rationale",
+        "measurements",
+        "open_files",
+        "suggested_action"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^candidate-[0-9a-f]{20}$"
+        },
+        "path": {
+          "type": "string"
+        },
+        "source_root": {
+          "type": "string"
+        },
+        "identity": {
+          "$ref": "#/$defs/identity"
+        },
+        "category": {
+          "type": "string"
+        },
+        "risk": {
+          "enum": [
+            "low",
+            "review",
+            "high"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "rebuildability": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "measurements": {
+          "$ref": "#/$defs/measurements"
+        },
+        "open_files": {
+          "type": "object"
+        },
+        "suggested_action": {
+          "const": "review"
+        }
+      },
+      "additionalProperties": false
+    },
+    "audit": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "kind",
+        "tool",
+        "created_at",
+        "host",
+        "mode",
+        "parameters",
+        "roots",
+        "filesystems",
+        "candidates",
+        "summary",
+        "warnings",
+        "safety",
+        "report_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^1\\."
+        },
+        "kind": {
+          "const": "reclaim-storage.audit"
+        },
+        "tool": {
+          "type": "object"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "host": {
+          "type": "object"
+        },
+        "mode": {
+          "const": "read_only"
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "roots": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "filesystems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/filesystem"
+          }
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "summary": {
+          "type": "object"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "safety": {
+          "type": "object",
+          "required": [
+            "deletion_performed"
+          ],
+          "properties": {
+            "deletion_performed": {
+              "const": false
+            }
+          },
+          "additionalProperties": true
+        },
+        "report_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "planTarget": {
+      "type": "object",
+      "required": [
+        "candidate_id",
+        "path",
+        "source_root",
+        "risk",
+        "category",
+        "rationale",
+        "audited_identity",
+        "audited_measurements",
+        "open_files",
+        "current_state",
+        "planned_action"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^candidate-[0-9a-f]{20}$"
+        },
+        "path": {
+          "type": "string"
+        },
+        "source_root": {
+          "type": "string"
+        },
+        "risk": {
+          "enum": [
+            "low",
+            "review",
+            "high"
+          ]
+        },
+        "category": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "audited_identity": {
+          "$ref": "#/$defs/identity"
+        },
+        "audited_measurements": {
+          "$ref": "#/$defs/measurements"
+        },
+        "open_files": {
+          "type": "object"
+        },
+        "current_state": {
+          "type": "object"
+        },
+        "planned_action": {
+          "const": "review_for_removal"
+        }
+      },
+      "additionalProperties": false
+    },
+    "plan": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "kind",
+        "tool",
+        "created_at",
+        "source_report",
+        "mode",
+        "targets",
+        "filesystems_before",
+        "summary",
+        "approval",
+        "execution",
+        "verification",
+        "plan_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^1\\."
+        },
+        "kind": {
+          "const": "reclaim-storage.plan"
+        },
+        "tool": {
+          "type": "object"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_report": {
+          "type": "object"
+        },
+        "mode": {
+          "const": "non_executable_plan"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/planTarget"
+          }
+        },
+        "filesystems_before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/filesystem"
+          }
+        },
+        "summary": {
+          "type": "object"
+        },
+        "approval": {
+          "type": "object",
+          "required": [
+            "required",
+            "granted"
+          ],
+          "properties": {
+            "required": {
+              "const": true
+            },
+            "granted": {
+              "const": false
+            }
+          },
+          "additionalProperties": true
+        },
+        "execution": {
+          "type": "object",
+          "required": [
+            "supported"
+          ],
+          "properties": {
+            "supported": {
+              "const": false
+            }
+          },
+          "additionalProperties": true
+        },
+        "verification": {
+          "type": "object"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "kind",
+        "tool",
+        "created_at",
+        "source_plan",
+        "filesystems",
+        "targets",
+        "summary",
+        "interpretation",
+        "deletion_performed",
+        "verification_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^1\\."
+        },
+        "kind": {
+          "const": "reclaim-storage.verification"
+        },
+        "tool": {
+          "type": "object"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_plan": {
+          "type": "object"
+        },
+        "filesystems": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "summary": {
+          "type": "object"
+        },
+        "interpretation": {
+          "type": "string"
+        },
+        "deletion_performed": {
+          "const": false
+        },
+        "verification_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
