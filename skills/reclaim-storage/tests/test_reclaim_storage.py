@@ -159,6 +159,21 @@ class WorkflowTests(unittest.TestCase):
                 "SymlinkSkipped",
             )
 
+    def test_same_volume_subdirectories_become_candidates(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            cache_root = Path(temporary) / "Caches"
+            cache_root.mkdir()
+            (cache_root / "alpha").mkdir()
+            (cache_root / "beta").mkdir()
+
+            paths, skipped = reclaim_storage.candidate_paths(cache_root, 1)
+
+            self.assertEqual(
+                sorted(path.name for path in paths),
+                ["alpha", "beta"],
+            )
+            self.assertEqual(skipped, [])
+
     def test_plan_rejects_unknown_candidate_id(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             workspace = Path(temporary)

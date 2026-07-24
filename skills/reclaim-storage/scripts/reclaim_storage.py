@@ -465,7 +465,10 @@ def candidate_paths(root: Path, depth: int) -> tuple[list[Path], list[dict[str, 
     for entry in entries:
         entry_path = Path(entry.path)
         try:
-            entry_stat = entry.stat(follow_symlinks=False)
+            # On Windows, DirEntry.stat() may report st_dev as 0. Use os.stat
+            # without following links so same-volume directories remain candidates
+            # while symlink and reparse-point safety is preserved.
+            entry_stat = os.stat(entry.path, follow_symlinks=False)
             if is_link_like_stat(entry_stat):
                 skipped.append(
                     {
